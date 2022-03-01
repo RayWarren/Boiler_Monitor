@@ -1,0 +1,52 @@
+{
+	"folders": [
+		{
+			"path": "../../oledtest"
+		},
+		{
+			"name": "Oleadtest2",
+			"path": "../../Oleadtest2"
+		},
+		{
+			"name": "Boiler_Monitor",
+			"path": ".."
+		},
+		{
+			"name": "altrenateBoilerMonitor",
+			"path": "../../altrenateBoilerMonitor"
+		},
+		{
+			"name": "oliad13esp3266",
+			"path": "../../oliad13esp3266"
+		},
+		{
+			"name": "esp32camtrial",
+			"path": "../../esp32camtrial"
+		},
+		{
+			"name": "webclock",
+			"path": "../../webclock"
+		},
+		{
+			"name": "testbed",
+			"path": "../../testbed"
+		}
+	],
+	"settings": {
+		"sqltools.connections": [
+			{
+				"mysqlOptions": {
+					"authProtocol": "default"
+				},
+				"previewLimit": 50,
+				"server": "192.168.1.41",
+				"port": 3306,
+				"driver": "MariaDB",
+				"name": "test1",
+				"database": "test1",
+				"username": "uno",
+				"password": "IOTcard"
+			}
+		]
+	}
+}

@@ -1,0 +1,312 @@
+//vers .1
+
+#include <Arduino.h>
+#include <DallasTemperature.h>
+#include <WiFiNINA.h>
+#include <Wire.h>
+#include <MySQL_Connection.h>
+#include <MySQL_Cursor.h>
+#include <RTClib.h>
+#include <LiquidCrystal_I2C.h>
+int iteration = 0;
+// lcd stuff
+LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
+#define columns 20
+#define rows 4
+// sensor processing
+
+// pressure
+int boilerPin = A0;
+int BoilerReading;
+float sensorvoltage;
+float boilerpressure;
+float conversionfactor = .00488;
+float scaleamount = 7.5; // psi/volt of sensor output
+float offset = .44;
+// temperature
+
+#define thermostat_mon 6 // pin for thermostat monitor
+#define burner_mon 7
+float outputtemp;
+float Llooptemp;
+float Slooptemp;
+float outsidetemp;
+
+char outputdata[7];
+char bigreturndata[7];
+char smallreturndata[7];
+char outsidedata[7];
+char boilerdata[6];
+char burnerstate[2];
+char Thermostaton[2];
+
+uint8_t burner_status;
+uint8_t call_for_heat;
+
+// clock and interrupts
+const byte SQWinput = 8;
+volatile int EDGE;
+RTC_DS3231 rtc;
+int sampletime = 0;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+// Creating a oneWire instance(object) for each temp bus
+OneWire ds18x20[] = {2, 3, 4, 5};
+const int oneWireCount = sizeof(ds18x20) / sizeof(OneWire);
+DallasTemperature sensor[oneWireCount];
+
+// mysql database
+IPAddress server_addr(192, 168, 1, 41); // IP of the MySQL *server* here
+char user[] = "uno";                    // MySQL user login username
+char password[] = "IOTcard";            // MySQL user login password
+char INSERT_DATA[] = "INSERT INTO test1.tankpressure (TankP,tempout,longloop,shortloop,outside,burner_status,Thermostat)VALUES(%s,%s,%s,%s,%s,%s,%s)";
+char query[128];
+char MYSQL_QUIT[] = "quit";
+
+// WiFi card
+char ssid[] = "RaysHouse";        // your SSID
+char pass[] = "46C235E92AE7C041"; // your SSID Password}
+int status = WL_IDLE_STATUS;
+byte mac_addr[] = {0x7C, 0x9E, 0xBD, 0x7D, 0xFA, 0x58};
+WiFiClient client; // Use this for WiFi instead of EthernetClient
+MySQL_Connection conn((Client *)&client);
+IPAddress ip;
+//_______________________________________________________________________________________________________________________________
+// Interrupt Service Routine - This routine is performed when a falling edge on the 1Hz SQW clock from the RTC is detected
+void Isr()
+{
+  EDGE = 0; // A falling edge was detected on the SQWinput pin.  Now set EDGE equal to 0.
+}
+
+//_______________________________________________________
+  void displayTime()
+  {
+    DateTime now = rtc.now();
+
+    Serial.print(now.year(), DEC);
+    Serial.print('/');
+    Serial.print(now.month(), DEC);
+    Serial.print('/');
+    Serial.print(now.day(), DEC);
+    Serial.print("  ");
+    Serial.print(now.hour(), DEC);
+    Serial.print(':');
+    Serial.print(now.minute(), DEC);
+    Serial.print(':');
+    Serial.print(now.second(), DEC);
+    Serial.println();
+
+    lcd.setCursor(0, 1);
+    lcd.print(now.year(), DEC);
+    lcd.print('/');
+    lcd.print(now.month(), DEC);
+    lcd.print('/');
+    lcd.print(now.day(), DEC);
+    lcd.print("  ");
+    lcd.print(now.hour(), DEC);
+    lcd.print(':');
+    lcd.print(now.minute(), DEC);
+    lcd.print(':');
+    lcd.print(now.second(), DEC);
+   
+  }
+//__________________________________________________________________
+void chkheat()
+{
+  for( int i = 0; i < oneWireCount; i++)
+    {
+      sensor[i].requestTemperatures();
+    }
+  delay(1000);
+  outputtemp = sensor[0].getTempFByIndex(0);
+  Llooptemp = sensor[1].getTempFByIndex(0);
+  Slooptemp = sensor[2].getTempFByIndex(0);
+  outsidetemp = sensor[3].getTempFByIndex(0);
+
+  dtostrf(outputtemp, -6, 1, outputdata);
+  dtostrf(Llooptemp, -6, 1, bigreturndata);
+  dtostrf(Slooptemp, -6, 1, smallreturndata);
+  dtostrf(outsidetemp, -6, 1, outsidedata);
+
+  // local temperature display
+  lcd.setCursor(0, 0);
+  lcd.print("Boiltemp = ");
+  lcd.print(outputtemp);
+
+  lcd.setCursor(0, 1);
+  lcd.print("Llooptemp = ");
+  lcd.print(Llooptemp);
+
+  lcd.setCursor(0, 2);
+  lcd.print("Slooptemp = ");
+  lcd.print(Slooptemp);
+
+  lcd.setCursor(0, 3);
+  lcd.print("ext: ");
+  lcd.print(outsidetemp);
+  delay(1000);
+  lcd.setCursor(0, 17);
+  
+  burner_status = (digitalRead(burner_mon));
+  
+  call_for_heat = (digitalRead(thermostat_mon));
+  
+  dtostrf(burner_status, 1, 0, burnerstate);
+  dtostrf(call_for_heat, 1, 0,Thermostaton);
+
+  lcd.print("B:");
+  lcd.print(burnerstate);
+  lcd.setCursor(1, 17);
+  lcd.print("T:");
+  lcd.print(Thermostaton);
+}
+//_______________________________________________________________________
+void chkpressure()
+{
+  BoilerReading = analogRead(boilerPin);
+  sensorvoltage = (BoilerReading * conversionfactor);
+  boilerpressure = (sensorvoltage - offset) * scaleamount;
+  dtostrf(boilerpressure, 5, 1, boilerdata);
+  lcd.setCursor(0, 2);
+  lcd.print("boiler press = ");
+  lcd.print(boilerpressure);
+  delay(1000);
+}
+//____________________________________________________________________________________
+// if the wifi dropped out reconnect it
+void TestWiFiConnection()
+{
+  int status = WiFi.status();
+  Serial.print("wifi status  = ");
+  Serial.println(status);
+
+  while (status != WL_CONNECTED)
+  {
+    Serial.print("Attempting to reconnect to Network named: ");
+    Serial.println(ssid);
+    Serial.println(pass);
+    status = WiFi.begin(ssid, pass);
+    delay(3000);
+  }
+  // print out info about the connection:
+
+  Serial.println("Connected to network");
+ ip = WiFi.localIP();
+  Serial.print("My IP address is: ");
+  Serial.println(ip);
+}
+
+  //_________________________________________________________________
+void setup()
+{
+  Serial.begin(57600);
+  //set up the interrupt
+  rtc.begin();
+  rtc.writeSqwPinMode(DS3231_SquareWave1Hz);
+
+  pinMode(SQWinput, INPUT_PULLUP);                                       // Configure the SQWinput pin as an INPUT to monitor the SQW pin of the DS3231.
+  //digitalWrite(SQWinput, HIGH);    using ext pullup resist  so Enableing the internal pull-up resistor, since the SQW pin on the DS3231 is an Open Drain output.
+  attachInterrupt(digitalPinToInterrupt(SQWinput), Isr, FALLING); // Configure SQWinput (pin 2 of the Arduino) for use by the Interrupt Service Routine (Isr)
+  EDGE = 1;
+
+  lcd.begin(columns, rows);
+  lcd.setCursor(0, 0);
+  lcd.clear();
+
+  // Start up the library on all defined bus-wires
+  DeviceAddress deviceAddress;
+  Serial.print("============Ready with ");
+  Serial.print(oneWireCount);
+  Serial.println(" Sensors================");
+  for (int i = 0; i < oneWireCount; i++)
+  {
+    //begin one wire
+    // set sensors to 10 bit resolution
+    sensor[i].setOneWire(&ds18x20[i]);
+    sensor[i].begin();
+    if (sensor[i].getAddress(deviceAddress, 0))
+      sensor[i].setResolution(deviceAddress, 10);
+  }
+  pinMode(thermostat_mon, INPUT_PULLUP);
+  pinMode(burner_mon, INPUT_PULLUP);
+
+  // Begin WiFi section
+  // int status = WiFi.begin(ssid, pass);
+  while (status != WL_CONNECTED)
+  {
+
+    Serial.print("Attempting to connect to Network named: ");
+    Serial.println(ssid);
+    Serial.println(pass);
+    status = WiFi.begin(ssid, pass);
+    delay(3000);
+  }
+  // print out info about the connection:
+
+  Serial.println("Connected to network");
+  IPAddress ip = WiFi.localIP();
+  Serial.print("My IP address is: ");
+  Serial.println(ip);
+  lcd.print(ip);
+
+  Serial.println("Connecting to mysql");
+
+  if (conn.connect(server_addr, 3306, user, password))
+  {
+    Serial.print("got connection");
+    delay(100);
+  }
+  else
+    Serial.println("Connection failed.");
+
+  delay(1000);
+}
+
+
+void loop() 
+{
+
+  if (EDGE == 0)
+   
+   {    
+    // increment the number of intervals
+     sampletime++;
+     if (sampletime > 720) //~ every 12 min or 5 samples/hour
+       {
+         iteration++;
+         detachInterrupt(digitalPinToInterrupt(SQWinput));
+         ip = WiFi.localIP();
+         Serial.print("ip = ");
+         Serial.println(ip);
+         chkheat();
+         chkpressure();
+         char query[150];
+         sprintf(query, INSERT_DATA, boilerdata, outputdata, bigreturndata, smallreturndata, outputdata, burner_status, Thermostaton);
+         TestWiFiConnection();
+         delay(500);
+         if (conn.connect(server_addr, 3306, user, password))
+         {
+           Serial.println("got connection");
+           delay(200);
+         }
+           MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
+           delay(500);
+           cur_mem->execute(query);
+           delay(100);
+           sampletime = 0; // reset the interval counter
+
+           // Deleting the cursor also frees up memory used
+           sprintf(query, MYSQL_QUIT);
+           cur_mem->disconnect(MYSQL_QUIT);
+           delete cur_mem;
+           conn.close();
+           // reattach the interrupt
+           attachInterrupt(digitalPinToInterrupt(SQWinput), Isr, FALLING);
+           sampletime = 0; // reset the sample interval
+       }
+     // display the time
+   
+     EDGE = 1; // reset the interrupt
+
+   }
+}
