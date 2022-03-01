@@ -116,7 +116,6 @@ boolean MySQL_Cursor::execute(const char *query, boolean progmem)
   return execute_cmd(query_len,0);
 }
 
-
 /*
   execute_query - execute a query
 
@@ -130,7 +129,9 @@ boolean MySQL_Cursor::execute(const char *query, boolean progmem)
 
   Returns boolean - true = result set available,
                     false = no result set returned.
-                    */
+ Modified by Ray Warre  2/2022 to add explicit quit message to
+ database via mode variable for command feild 1 for quit 3 for query in buffer[4]
+ */
 boolean MySQL_Cursor::execute_cmd (int query_len,boolean mode)
 {
   if (!conn->buffer)
@@ -142,13 +143,13 @@ boolean MySQL_Cursor::execute_cmd (int query_len,boolean mode)
 
   conn->store_int(&conn->buffer[0], query_len+1, 3);
   conn->buffer[3] = byte(0x00);
-  if (mode == 1)
+  if (mode == 1) // command feild for quit
   {
     conn->buffer[4] = byte(0x01);
-  }                              // command packet for quit
+  }
   else
   {
-    conn->buffer[4] = byte(0x03);  // command packet
+    conn->buffer[4] = byte(0x03); // command feild for query
   }
   conn->print_packet();
   // Send the query

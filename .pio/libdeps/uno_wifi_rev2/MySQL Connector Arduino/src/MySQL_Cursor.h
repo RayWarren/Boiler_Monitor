@@ -70,7 +70,8 @@ class MySQL_Cursor {
     boolean disconnect(const char *query, boolean progmem = false);
 
   private:
-    boolean execute_cmd(int query_len,boolean mode);
+    // added mode variable to alloe alternate command field to be sent to database
+    boolean execute_cmd(int query_len, boolean mode);
 
 #ifdef WITH_SELECT
   public:
