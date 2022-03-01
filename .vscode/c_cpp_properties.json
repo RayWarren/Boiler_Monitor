@@ -1,0 +1,81 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/include",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/src",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/MySQL Connector Arduino/src",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/RTClib/src",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/Adafruit BusIO",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/LiquidCrystal_I2C/src",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/WiFiNINA/src",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/SPI/src",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/DallasTemperature",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/OneWire",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/DS3231",
+                "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/extEEPROM",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/Wire/src",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/cores/arduino/api/deprecated",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/cores/arduino",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/variants/uno2018",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/EEPROM/src",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/HID/src",
+                "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/SoftwareSerial/src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/include",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/src",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/MySQL Connector Arduino/src",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/RTClib/src",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/Adafruit BusIO",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/LiquidCrystal_I2C/src",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/WiFiNINA/src",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/SPI/src",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/DallasTemperature",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/OneWire",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/DS3231",
+                    "/home/ray/Documents/PlatformIO/Projects/Boiler_Monitor/.pio/libdeps/uno_wifi_rev2/extEEPROM",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/Wire/src",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/cores/arduino/api/deprecated",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/cores/arduino",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/variants/uno2018",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/EEPROM/src",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/HID/src",
+                    "/home/ray/.platformio/packages/framework-arduino-megaavr/libraries/SoftwareSerial/src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=50205",
+                "ARDUINO_AVR_UNO_WIFI_REV2",
+                "UNO_WIFI_REV2_328MODE",
+                "MILLIS_USE_TIMERB3",
+                "F_CPU=16000000L",
+                "ARDUINO_ARCH_MEGAAVR",
+                "ARDUINO=10808",
+                "USB_VID=0x03eb",
+                "USB_PID=0x2145",
+                "USB_PRODUCT=\"Arduino Uno WiFi Rev2\"",
+                "USB_MANUFACTURER=\"Arduino\"",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "/home/ray/.platformio/packages/toolchain-atmelavr/bin/avr-gcc",
+            "compilerArgs": [
+                "-mmcu=atmega4809",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
