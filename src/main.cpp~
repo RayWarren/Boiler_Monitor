@@ -76,9 +76,9 @@ DallasTemperature sensor[oneWireCount];
 
 // mysql database
 IPAddress server_addr(192, 168, 1, 41);                                                                                                                // IP of the MySQL *server* here
-char user[] = "xxxxxxx";                                                                                                                                  // MySQL user login username
+char user[] = "name";                                                                                                                                  // MySQL user login username
 char password[] = "MYOB";                                                                                                                              // MySQL user login password
-char INSERT_DATA[] = "INSERT INTO Boiler_Status.Readings (BoilerP,tempout,longloop,shortloop,outside,burner_status,Thermostat)VALUES(%s,%s,%s,%s,%s,%s,%s)"; // actual values match to database.table and columns or could add database to login and just specify table here
+char INSERT_DATA[] = "INSERT INTO test1.tankpressure (TankP,tempout,longloop,shortloop,outside,burner_status,Thermostat)VALUES(%s,%s,%s,%s,%s,%s,%s)"; // actual values match to database.table and columns or could add database to login and just specify table here
 char query[128];                                                                                                                                       // large enough for complete query text
 char MYSQL_QUIT[] = "quit";                                                                                                                            // my mariahdb grumbles if you don't say goodbye
 
@@ -166,11 +166,11 @@ void chkheat()
   lcd.print(outsidedata);
   delay(1000);
 
-  //  get the status of the thermostat and burner control on/off,active low input
-  burner_status = !(digitalRead(burner_mon));
-  call_for_heat = !(digitalRead(thermostat_mon));
+  //  get the status of the thermostat and burner control on/off
+  burner_status = (digitalRead(burner_mon));
+  call_for_heat = (digitalRead(thermostat_mon));
 
-  // on/off status format is n
+// on/off status format is n
   dtostrf(burner_status, 2, 0, burnerstate);
   dtostrf(call_for_heat, 2, 0, Thermostaton);
 
@@ -302,9 +302,8 @@ void setup()
     Serial.println("Connection failed.");
 
   delay(1000);
-  chkheat(); // get initial readings
-  chkpressure();
-  displaycount = 0;
+  displaycount = -721; // make sure there are initial readings to display
+ 
 }
 
 void loop()
@@ -319,8 +318,6 @@ void loop()
 
     if (displaycount > 120)
     {
-      if (displaycount < 2)
-        lcd.clear();
       // local temperature display
       lcd.clear();
       lcd.setCursor(0, 0);
